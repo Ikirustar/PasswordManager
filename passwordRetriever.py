@@ -1,5 +1,5 @@
 import keyring
-import tkinter as tk
+import pyperclip
 
 
 # * Terminal Colors
@@ -28,34 +28,43 @@ class TerminalColors:
         return f"{''.join(effects)}{text}{TerminalColors.RESET}"
 
 
-# * Functions
+class PasswordRetriever:
+    def __init__(self):
+        self.name = ""
+        self.attribute = ""
+        self.password = ""
 
+    def askForDetails(self):
+        self.name = input("Enter name: ")
+        self.attribute = input("Enter attribute: ")
 
-def setPassword(name, attr, psw):
-    try:
-        keyring.set_password(name, attr, psw)
-        print(TerminalColors.colorize("\npassword set\n",
-                                      TerminalColors.COMPLETION, TerminalColors.BOLD))
-    except Exception as e:
-        print(TerminalColors.colorize(f"\nError setting password: {e}\n",
-              TerminalColors.FAILURE, TerminalColors.BOLD))
+    def askForPassword(self):
+        self.password = input("Enter password: ")
 
+    def setPassword(self):
+        try:
+            keyring.set_password(self.name, self.attribute, self.password)
+            print(TerminalColors.colorize("\npassword set\n",
+                                          TerminalColors.COMPLETION, TerminalColors.BOLD))
+        except Exception as e:
+            print(TerminalColors.colorize(f"\nError setting password: {e}\n",
+                                          TerminalColors.FAILURE, TerminalColors.BOLD))
 
-def retrievePassword(name, attr):
-    try:
-        password = keyring.get_password(name, attr)
-        print(TerminalColors.colorize("\npassword copied\n",
-                                      TerminalColors.COMPLETION, TerminalColors.BOLD))
-        r = tk.Tk()
-        r.withdraw()  # hide main window
-        r.clipboard_clear()
-        r.clipboard_append(password)
-        r.update()  # keep clipboard content after closing
-        r.destroy()
+    def retrievePassword(self):
+        try:
+            password = keyring.get_password(self.name, self.attribute)
+            if password is None:
+                print(TerminalColors.colorize("\nNo password found for this service and username combination\n",
+                                              TerminalColors.WARNING, TerminalColors.BOLD))
+                return
 
-    except Exception as e:
-        print(TerminalColors.colorize(f"\nError retrieving password: {e}\n",
-              TerminalColors.FAILURE, TerminalColors.BOLD))
+            pyperclip.copy(password)
+            print(TerminalColors.colorize("\npassword copied to clipboard\n",
+                                          TerminalColors.COMPLETION, TerminalColors.BOLD))
+
+        except Exception as e:
+            print(TerminalColors.colorize(f"\nError retrieving password: {e}\n",
+                                          TerminalColors.FAILURE, TerminalColors.BOLD))
 
 
 def display_menu():
@@ -75,14 +84,14 @@ def main():
         display_menu()
         choice = input("Pick an option: ")
         if choice == "1":
-            name = input("Enter name: ")
-            attribute = input("Enter attribute: ")
-            password = input("Enter password: ")
-            setPassword(name, attribute, password)
+            retriever = PasswordRetriever()
+            retriever.askForDetails()
+            retriever.askForPassword()
+            retriever.setPassword()
         elif choice == "2":
-            name = input("Enter name: ")
-            attribute = input("Enter attribute: ")
-            retrievePassword(name, attribute)
+            retriever = PasswordRetriever()
+            retriever.askForDetails()
+            retriever.retrievePassword()
         elif choice == "3":
             programRun = False
         else:
