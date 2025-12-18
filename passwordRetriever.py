@@ -1,5 +1,6 @@
 import keyring
 import pyperclip
+import msvcrt
 
 
 # * Terminal Colors
@@ -82,17 +83,18 @@ def main():
     programRun = True
     while programRun:
         display_menu()
-        choice = input("Pick an option: ")
-        if choice == "1":
+        choice = int(msvcrt.getch())
+        print("Pick an option: ")
+        if choice == 1:
             retriever = PasswordRetriever()
             retriever.askForDetails()
             retriever.askForPassword()
             retriever.setPassword()
-        elif choice == "2":
+        elif choice == 2:
             retriever = PasswordRetriever()
             retriever.askForDetails()
             retriever.retrievePassword()
-        elif choice == "3":
+        elif choice == 3:
             programRun = False
         else:
             print("Invalid choice. Please select a valid option.")
